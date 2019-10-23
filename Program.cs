@@ -20,10 +20,20 @@ namespace Breitensuche
 
         override protected void OnPaint(PaintEventArgs e)
         {
+
+            
             RectangleF bounds = e.Graphics.VisibleClipBounds; // um die Groesse des sichtbaren Bereichs zu ermitteln
+
+            Font mazeFont = new Font("Arial", 12);
 
             //Lies Datei ein und lege schreibe auf Array 
             char[,] mazeArray = GetInput();
+            // Berechne Spacing
+            float spaceX = bounds.Width / mazeArray.GetUpperBound(2) + 1;
+            float spaceY = bounds.Height / mazeArray.GetUpperBound(1) + 1; 
+            // Zeichne Labyrinth
+            DrawMaze(e.Graphics, mazeArray, mazeFont, spaceX, spaceY);
+
         }
 
         private char[,] GetInput ()
@@ -60,8 +70,11 @@ namespace Breitensuche
             return charArray;
         }
 
-        private void SierpinskiTeppich(Graphics g, Brush brush, Single x, Single y, Single width, Single height, int iteration)
+        //Übergebe Array, Startkoordinaten, Schriftart, Abstand zwischen den Zeichen in X und Y 
+        private void DrawMaze(Graphics g, Array array, Font font, float spacingX, float spacingY)
         {
+            // Baue zwei Schleifen die das Labyrinth zeichen und frage ab, welches Zeichen 
+            // Setze anhand der Zeichen unterschiedliche Brushes ein
 
         }
         override protected void OnKeyDown(KeyEventArgs e)

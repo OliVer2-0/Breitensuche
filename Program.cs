@@ -29,8 +29,8 @@ namespace Breitensuche
             //Lies Datei ein und lege schreibe auf Array 
             char[,] mazeArray = GetInput();
             // Berechne Spacing
-            float spaceX = bounds.Width / mazeArray.GetUpperBound(2) + 1;
-            float spaceY = bounds.Height / mazeArray.GetUpperBound(1) + 1; 
+            float spaceX = bounds.Width / mazeArray.GetUpperBound(1) + 1;
+            float spaceY = bounds.Height / mazeArray.GetUpperBound(0) + 1; 
             // Zeichne Labyrinth
             DrawMaze(e.Graphics, mazeArray, mazeFont, spaceX, spaceY);
 
@@ -39,15 +39,15 @@ namespace Breitensuche
         private char[,] GetInput ()
         {
 
-            string line;
+            string line ="";
             int counter = 0, i = 0;
 
 
             int columns = Convert.ToInt16(Console.ReadLine());
             int lines = Convert.ToInt16(Console.ReadLine());
-            char[,] charArray = new char[columns, lines];
+            char[,] charArray = new char[lines, columns];
 
-            do
+            while (counter < charArray.GetUpperBound(0))
             {
                 //1. String einlesen 
                 line = Console.ReadLine();
@@ -65,16 +65,44 @@ namespace Breitensuche
                 i = 0;
 
                 
-            } while (line != null);
+            } //while (counter < charArray.GetUpperBound(1) - 1);
 
             return charArray;
         }
 
         //Übergebe Array, Startkoordinaten, Schriftart, Abstand zwischen den Zeichen in X und Y 
-        private void DrawMaze(Graphics g, Array array, Font font, float spacingX, float spacingY)
+        private void DrawMaze(Graphics g, char[,] array, Font font, float spacingX, float spacingY)
         {
             // Baue zwei Schleifen die das Labyrinth zeichen und frage ab, welches Zeichen 
             // Setze anhand der Zeichen unterschiedliche Brushes ein
+            float x = 0, y = 0;
+
+            for (int i = 0; i <= array.GetUpperBound(0) ; i++)
+            {
+                for (int n = 0; n <= array.GetUpperBound(1); n++)
+                {
+                    string s = Convert.ToString(array[i, n]);
+
+                    switch (s)
+                    {
+                        case "#":
+                            SolidBrush brushGreen = new SolidBrush(Color.Green);
+                            g.DrawString(s, font, brushGreen, x, y);
+                            break;
+                        case ".":
+                            SolidBrush brushBlue = new SolidBrush(Color.Blue);
+                            g.DrawString(s, font, brushBlue, x, y);
+                            break;
+                        case "@":
+                            SolidBrush brushRed = new SolidBrush(Color.Red);
+                            g.DrawString(s, font, brushRed, x, y);
+                            break;
+                           
+                    }
+                    x = x + spacingX;
+                }
+                y = y + spacingY;
+            }
 
         }
         override protected void OnKeyDown(KeyEventArgs e)

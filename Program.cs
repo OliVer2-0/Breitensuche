@@ -23,14 +23,14 @@ namespace Breitensuche
 
 
             RectangleF bounds = e.Graphics.VisibleClipBounds; // um die Groesse des sichtbaren Bereichs zu ermitteln
-
+            
             Font mazeFont = new Font("Arial", 12);
 
             //Lies Datei ein und lege schreibe auf Array 
             char[,] mazeArray = GetInput();
             // Berechne Spacing
-            float spaceX = bounds.Width / mazeArray.GetUpperBound(1) + 1;
-            float spaceY = bounds.Height / mazeArray.GetUpperBound(0) + 1;
+            float spaceX = bounds.Width / (float)(mazeArray.GetUpperBound(1) + 1);
+            float spaceY = bounds.Height / (float)(mazeArray.GetUpperBound(0) + 1);
             // Zeichne Labyrinth
             DrawMaze(e.Graphics, mazeArray, mazeFont, spaceX, spaceY);
 

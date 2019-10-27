@@ -21,7 +21,7 @@ namespace Breitensuche
         override protected void OnPaint(PaintEventArgs e)
         {
 
-            
+
             RectangleF bounds = e.Graphics.VisibleClipBounds; // um die Groesse des sichtbaren Bereichs zu ermitteln
 
             Font mazeFont = new Font("Arial", 12);
@@ -30,16 +30,16 @@ namespace Breitensuche
             char[,] mazeArray = GetInput();
             // Berechne Spacing
             float spaceX = bounds.Width / mazeArray.GetUpperBound(1) + 1;
-            float spaceY = bounds.Height / mazeArray.GetUpperBound(0) + 1; 
+            float spaceY = bounds.Height / mazeArray.GetUpperBound(0) + 1;
             // Zeichne Labyrinth
             DrawMaze(e.Graphics, mazeArray, mazeFont, spaceX, spaceY);
 
         }
 
-        private char[,] GetInput ()
+        private char[,] GetInput()
         {
 
-            string line ="";
+            string line = "";
             int counter = 0, i = 0;
 
 
@@ -52,7 +52,7 @@ namespace Breitensuche
                 //1. String einlesen 
                 line = Console.ReadLine();
                 //2. Chars aus String kopieren
-                foreach(char c in line)
+                foreach (char c in line)
                 {
                     // Char auf Array Zeile = Counter, Spalte = i legen
                     charArray[counter, i] = c;
@@ -64,7 +64,7 @@ namespace Breitensuche
                 counter++;
                 i = 0;
 
-                
+
             } //while (counter < charArray.GetUpperBound(1) - 1);
 
             return charArray;
@@ -77,7 +77,7 @@ namespace Breitensuche
             // Setze anhand der Zeichen unterschiedliche Brushes ein
             float x = 0, y = 0;
 
-            for (int i = 0; i <= array.GetUpperBound(0) ; i++)
+            for (int i = 0; i <= array.GetUpperBound(0); i++)
             {
                 for (int n = 0; n <= array.GetUpperBound(1); n++)
                 {
@@ -97,11 +97,12 @@ namespace Breitensuche
                             SolidBrush brushRed = new SolidBrush(Color.Red);
                             g.DrawString(s, font, brushRed, x, y);
                             break;
-                           
+
                     }
                     x = x + spacingX;
                 }
                 y = y + spacingY;
+                x = 0;
             }
 
         }

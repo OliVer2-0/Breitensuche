@@ -6,11 +6,16 @@ namespace Breitensuche
 {
     class Breitensuche : Form
     {
+        char[,] mazeArray;
+        int playerPosX = 0, playerPosY = 0;
+
         public Breitensuche()
         {
             Width = 600;
             Height = 600;
             Text = "Breitensuche";
+            ResizeRedraw = true;
+            mazeArray = GetInput();
         }
 
         static void Main()
@@ -20,20 +25,19 @@ namespace Breitensuche
 
         override protected void OnPaint(PaintEventArgs e)
         {
-
+            base.OnPaint(e);
 
             RectangleF bounds = e.Graphics.VisibleClipBounds; // um die Groesse des sichtbaren Bereichs zu ermitteln
             
             Font mazeFont = new Font("Arial", 12);
-
             //Lies Datei ein und lege schreibe auf Array 
-            char[,] mazeArray = GetInput();
+            //char[,] mazeArray = GetInput();
+
             // Berechne Spacing
             float spaceX = bounds.Width / (float)(mazeArray.GetUpperBound(1) + 1);
             float spaceY = bounds.Height / (float)(mazeArray.GetUpperBound(0) + 1);
             // Zeichne Labyrinth
             DrawMaze(e.Graphics, mazeArray, mazeFont, spaceX, spaceY);
-
         }
 
         private char[,] GetInput()
@@ -47,7 +51,7 @@ namespace Breitensuche
             int lines = Convert.ToInt16(Console.ReadLine());
             char[,] charArray = new char[lines, columns];
 
-            while (counter < charArray.GetUpperBound(0))
+            while (counter <= charArray.GetUpperBound(0))
             {
                 //1. String einlesen 
                 line = Console.ReadLine();
@@ -63,9 +67,7 @@ namespace Breitensuche
                 //3. Bei nächstem String beginne in nächster Zeile und wieder Spalte 0 
                 counter++;
                 i = 0;
-
-
-            } //while (counter < charArray.GetUpperBound(1) - 1);
+            } 
 
             return charArray;
         }
@@ -91,11 +93,14 @@ namespace Breitensuche
                             break;
                         case ".":
                             SolidBrush brushBlue = new SolidBrush(Color.Blue);
-                            g.DrawString(s, font, brushBlue, x, y);
+                            g.DrawString("°", font, brushBlue, x, y);
                             break;
                         case "@":
                             SolidBrush brushRed = new SolidBrush(Color.Red);
                             g.DrawString(s, font, brushRed, x, y);
+                            //Speichere Start-Spielerposi für späteres navigieren im Laby
+                            playerPosX = n;
+                            playerPosY = i;
                             break;
 
                     }
@@ -108,7 +113,74 @@ namespace Breitensuche
         }
         override protected void OnKeyDown(KeyEventArgs e)
         {
+            base.OnKeyDown(e);
 
+            switch (e.KeyCode)
+            {
+                case Keys.Up:
+                    if (mazeArray[playerPosY - 1, playerPosX] == '#')
+                        break;
+                    else if(mazeArray[playerPosY -1, playerPosX] == '°')
+                    {
+                        mazeArray[playerPosY - 1, playerPosX] = '@';
+                        mazeArray[playerPosY, playerPosX] = ' ';
+                    }
+                    else
+                    {
+                        mazeArray[playerPosY - 1, playerPosX] = '@';
+                        mazeArray[playerPosY, playerPosX] = ' ';
+                    }
+                    Refresh();
+                    break;
+                case Keys.Down:
+                    if (mazeArray[playerPosY + 1, playerPosX] == '#')
+                        break;
+                    else if (mazeArray[playerPosY + 1, playerPosX] == '°')
+                    {
+                        mazeArray[playerPosY + 1, playerPosX] = '@';
+                        mazeArray[playerPosY, playerPosX] = ' ';
+                    }
+                    else
+                    {
+                        mazeArray[playerPosY + 1, playerPosX] = '@';
+                        mazeArray[playerPosY, playerPosX] = ' ';
+                    }
+                    Refresh();
+                    break;
+                case Keys.Right:
+                    if (mazeArray[playerPosY, playerPosX + 1] == '#')
+                        break;
+                    else if (mazeArray[playerPosY, playerPosX + 1] == '°')
+                    {
+                        mazeArray[playerPosY, playerPosX + 1] = '@';
+                        mazeArray[playerPosY, playerPosX] = ' ';
+                    }
+                    else
+                    {
+                        mazeArray[playerPosY, playerPosX + 1] = '@';
+                        mazeArray[playerPosY, playerPosX] = ' ';
+                    }
+                    Refresh();
+                    break;
+                case Keys.Left:
+                    if (mazeArray[playerPosY, playerPosX - 1] == '#')
+                        break;
+                    else if (mazeArray[playerPosY, playerPosX - 1] == '°')
+                    {
+                        mazeArray[playerPosY, playerPosX - 1] = '@';
+                        mazeArray[playerPosY, playerPosX] = ' ';
+                    }
+                    else
+                    {
+                        mazeArray[playerPosY, playerPosX - 1] = '@';
+                        mazeArray[playerPosY, playerPosX] = ' ';
+                    }
+                    Refresh();
+                    break;
+                default:
+                    break;
+                       
+            }
         }
     }
 

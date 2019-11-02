@@ -179,9 +179,14 @@ namespace Breitensuche
                     break;
                 default:
                     break;
-                       
+                    
             }
         }
+    }
+
+    class Computerplayer
+    {
+
     }
 
 }

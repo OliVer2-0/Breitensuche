@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Windows.Forms;
 using System.Drawing;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Breitensuche
 {
@@ -36,7 +38,7 @@ namespace Breitensuche
             // Berechne Spacing
             float spaceX = bounds.Width / (float)(mazeArray.GetUpperBound(1) + 1);
             float spaceY = bounds.Height / (float)(mazeArray.GetUpperBound(0) + 1);
-            // Zeichne Labyrinth
+            // Zeichne Labyrinth - Übergabe mazeArray nicht sinnvoll ?! 
             DrawMaze(e.Graphics, mazeArray, mazeFont, spaceX, spaceY);
         }
 
@@ -120,7 +122,7 @@ namespace Breitensuche
                 case Keys.Up:
                     if (mazeArray[playerPosY - 1, playerPosX] == '#')
                         break;
-                    else if(mazeArray[playerPosY -1, playerPosX] == '°')
+                    else if(mazeArray[playerPosY -1, playerPosX] == '.')
                     {
                         mazeArray[playerPosY - 1, playerPosX] = '@';
                         mazeArray[playerPosY, playerPosX] = ' ';
@@ -135,7 +137,7 @@ namespace Breitensuche
                 case Keys.Down:
                     if (mazeArray[playerPosY + 1, playerPosX] == '#')
                         break;
-                    else if (mazeArray[playerPosY + 1, playerPosX] == '°')
+                    else if (mazeArray[playerPosY + 1, playerPosX] == '.')
                     {
                         mazeArray[playerPosY + 1, playerPosX] = '@';
                         mazeArray[playerPosY, playerPosX] = ' ';
@@ -150,7 +152,7 @@ namespace Breitensuche
                 case Keys.Right:
                     if (mazeArray[playerPosY, playerPosX + 1] == '#')
                         break;
-                    else if (mazeArray[playerPosY, playerPosX + 1] == '°')
+                    else if (mazeArray[playerPosY, playerPosX + 1] == '.')
                     {
                         mazeArray[playerPosY, playerPosX + 1] = '@';
                         mazeArray[playerPosY, playerPosX] = ' ';
@@ -165,7 +167,7 @@ namespace Breitensuche
                 case Keys.Left:
                     if (mazeArray[playerPosY, playerPosX - 1] == '#')
                         break;
-                    else if (mazeArray[playerPosY, playerPosX - 1] == '°')
+                    else if (mazeArray[playerPosY, playerPosX - 1] == '.')
                     {
                         mazeArray[playerPosY, playerPosX - 1] = '@';
                         mazeArray[playerPosY, playerPosX] = ' ';
@@ -186,7 +188,59 @@ namespace Breitensuche
 
     class Computerplayer
     {
+        Queue<Point> queue = new Queue<Point>();
+        Hashtable hashtable = new Hashtable();
 
+
+        public void BFS(char[,] array,int xPos, int yPos)
+        {
+            // Füge Spielerposi in leere Queue ein
+            Point playerPos = new Point(xPos, yPos);
+            queue.Enqueue(playerPos);
+            // Solange Schlange nicht leer ist 
+            while(queue.Count > 0)
+            {
+                // hole erstes Paar aus der Queue
+                Point firstPoint = queue.Dequeue();
+                // falls hier Item, brich ab und weiter mit Phase 2 
+                if(array[firstPoint.Y,firstPoint.X] == '.')
+                {
+                    break;
+                }
+                else
+                {
+                    // oberer Nachbar - entscheide mit Hilfe von CheckNeighbour
+                    // if(CheckNeighbour(array, point, direction) -> füge hinzu
+                    if(array[firstPoint.Y - 1, firstPoint.X] != '#' && )
+                }
+            }
+
+        }
+
+        bool CheckNeighbour(char[,] array, Point point, char direction)
+        {
+            bool itemAvailable = false;
+
+            switch (direction)
+            {
+                case 'u':
+                    // if nicht geblockt und nicht in hashtable
+                    if (array[point.Y -1, point.X] != '#' && )
+                    {
+
+                    }
+                    else
+                    break;
+                case 'd':
+                    break;
+                case 'l':
+                    break;
+                case 'r':
+                    break;
+            }
+
+            return itemAvailable;
+        }
     }
 
 }

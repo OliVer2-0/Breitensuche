@@ -211,7 +211,36 @@ namespace Breitensuche
                 {
                     // oberer Nachbar - entscheide mit Hilfe von CheckNeighbour
                     // if(CheckNeighbour(array, point, direction) -> füge hinzu
-                    if(array[firstPoint.Y - 1, firstPoint.X] != '#' && )
+                    if(CheckNeighbour(array,firstPoint,'u') )
+                    {
+                        // Füge Nachbarn in die Queue ein
+                        Point pointAbove = new Point(firstPoint.X, firstPoint.Y - 1);
+                        queue.Enqueue(pointAbove);
+                        //Nachbarn als Key hinzufügen und aktuelle Koordinaten als Value
+                        hashtable.Add(pointAbove, firstPoint);
+                    }
+                    if (CheckNeighbour(array, firstPoint, 'd'))
+                    {
+                        Point pointBelow = new Point(firstPoint.X, firstPoint.Y + 1);
+                        queue.Enqueue(pointBelow);
+
+                        hashtable.Add(pointBelow, firstPoint);
+                    }
+                    if (CheckNeighbour(array, firstPoint, 'l'))
+                    {
+                        Point pointLeft = new Point(firstPoint.X - 1, firstPoint.Y);
+                        queue.Enqueue(pointLeft);
+
+                        hashtable.Add(pointLeft, firstPoint);
+                    }
+                    if (CheckNeighbour(array, firstPoint, 'r'))
+                    {
+                        Point pointRight = new Point(firstPoint.X + 1, firstPoint.Y);
+                        queue.Enqueue(pointRight);
+
+                        hashtable.Add(pointRight, firstPoint);
+                    }
+
                 }
             }
 
@@ -224,18 +253,36 @@ namespace Breitensuche
             switch (direction)
             {
                 case 'u':
+                 
+                    // Setze Point auf Nachbarkoordinaten
+                    point.Y = point.Y - 1;
                     // if nicht geblockt und nicht in hashtable
-                    if (array[point.Y -1, point.X] != '#' && )
+                    if (array[point.Y, point.X] != '#' && !hashtable.ContainsKey(point))
                     {
-
+                        itemAvailable = true;
                     }
-                    else
                     break;
                 case 'd':
+                    point.Y = point.Y + 1;
+                    if(array[point.Y, point.X] != '#' && !hashtable.ContainsKey(point))
+                    {
+                        itemAvailable = true;
+                    }
                     break;
                 case 'l':
+                    point.X = point.X - 1;
+                    if (array[point.Y, point.X] != '#' && !hashtable.ContainsKey(point))
+                    {
+                        itemAvailable = true;
+                    }
+
                     break;
                 case 'r':
+                    point.X = point.X + 1;
+                    if(array[point.Y, point.X] != '#' && !hashtable.ContainsKey(point))
+                    {
+                        itemAvailable = true;
+                    }
                     break;
             }
 

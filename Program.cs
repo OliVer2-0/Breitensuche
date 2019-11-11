@@ -189,11 +189,14 @@ namespace Breitensuche
     class Computerplayer
     {
         Queue<Point> queue = new Queue<Point>();
-        Hashtable hashtable = new Hashtable();
+        Dictionary<Point, Point> dictionary = new Dictionary<Point, Point>();
+        Stack<Point> stack = new Stack<Point>();
 
 
-        public void BFS(char[,] array,int xPos, int yPos)
+        public bool BFSfindItem(char[,] array,int xPos, int yPos)
         {
+            //Item gefunden
+            bool foundItem = false;
             // Füge Spielerposi in leere Queue ein
             Point playerPos = new Point(xPos, yPos);
             queue.Enqueue(playerPos);
@@ -205,6 +208,9 @@ namespace Breitensuche
                 // falls hier Item, brich ab und weiter mit Phase 2 
                 if(array[firstPoint.Y,firstPoint.X] == '.')
                 {
+                    foundItem = true;
+                    // Lege Zielkoordinaten auf Stack - Schritt 2.1
+                    stack.Push(firstPoint);
                     break;
                 }
                 else
@@ -217,32 +223,71 @@ namespace Breitensuche
                         Point pointAbove = new Point(firstPoint.X, firstPoint.Y - 1);
                         queue.Enqueue(pointAbove);
                         //Nachbarn als Key hinzufügen und aktuelle Koordinaten als Value
-                        hashtable.Add(pointAbove, firstPoint);
+                        dictionary.Add(pointAbove, firstPoint);
+                    
                     }
                     if (CheckNeighbour(array, firstPoint, 'd'))
                     {
                         Point pointBelow = new Point(firstPoint.X, firstPoint.Y + 1);
                         queue.Enqueue(pointBelow);
 
-                        hashtable.Add(pointBelow, firstPoint);
+                        dictionary.Add(pointBelow, firstPoint);
+                       
                     }
                     if (CheckNeighbour(array, firstPoint, 'l'))
                     {
                         Point pointLeft = new Point(firstPoint.X - 1, firstPoint.Y);
                         queue.Enqueue(pointLeft);
 
-                        hashtable.Add(pointLeft, firstPoint);
+                        dictionary.Add(pointLeft, firstPoint);
+                       
                     }
                     if (CheckNeighbour(array, firstPoint, 'r'))
                     {
                         Point pointRight = new Point(firstPoint.X + 1, firstPoint.Y);
                         queue.Enqueue(pointRight);
 
-                        hashtable.Add(pointRight, firstPoint);
+                        dictionary.Add(pointRight, firstPoint);
+                   
                     }
 
                 }
             }
+            // Falls in Phase 1 Item gefunden, weiter mit Phase 2 
+            return foundItem;
+
+        }
+
+        // Phase 2 beginnend bei Schritt 2.2, Schritt 2.1 siehe Zeile 213
+        void BFSfindWay (int xPos, int yPos)
+        {
+            Point playerPos = new Point(xPos, yPos);
+            Point from = new Point();
+
+            //int hashCode = stack.Pop().GetHashCode();
+            // Zielposi liegt oben auf Stack, hole Posi 
+            Point targetPosi = stack.Pop();
+            // Frage ob ZielPosi in Hashtable
+            if (dictionary.ContainsKey(targetPosi))
+            {
+                ICollection keys = dictionary.Keys;
+                foreach(Point key in keys)
+                {
+                    // lese zugehörigen Value (vorherige Posi) aus Hashtable
+                    if(targetPosi.GetHashCode() == key.GetHashCode())
+                    {
+                        from = dictionary[targetPosi];
+                    }
+                }
+            }
+            // Solange from nicht ausgangsposi entspricht
+            while (!playerPos.Equals(from))
+            {
+                stack.Push(from);
+
+            }
+
+
 
         }
 
@@ -257,21 +302,21 @@ namespace Breitensuche
                     // Setze Point auf Nachbarkoordinaten
                     point.Y = point.Y - 1;
                     // if nicht geblockt und nicht in hashtable
-                    if (array[point.Y, point.X] != '#' && !hashtable.ContainsKey(point))
+                    if (array[point.Y, point.X] != '#' && !dictionary.ContainsKey(point))
                     {
                         itemAvailable = true;
                     }
                     break;
                 case 'd':
                     point.Y = point.Y + 1;
-                    if(array[point.Y, point.X] != '#' && !hashtable.ContainsKey(point))
+                    if(array[point.Y, point.X] != '#' && !dictionary.ContainsKey(point))
                     {
                         itemAvailable = true;
                     }
                     break;
                 case 'l':
                     point.X = point.X - 1;
-                    if (array[point.Y, point.X] != '#' && !hashtable.ContainsKey(point))
+                    if (array[point.Y, point.X] != '#' && !dictionary.ContainsKey(point))
                     {
                         itemAvailable = true;
                     }
@@ -279,7 +324,7 @@ namespace Breitensuche
                     break;
                 case 'r':
                     point.X = point.X + 1;
-                    if(array[point.Y, point.X] != '#' && !hashtable.ContainsKey(point))
+                    if(array[point.Y, point.X] != '#' && !dictionary.ContainsKey(point))
                     {
                         itemAvailable = true;
                     }

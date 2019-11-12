@@ -179,6 +179,16 @@ namespace Breitensuche
                     }
                     Refresh();
                     break;
+                case Keys.S:
+                    if (Computerplayer.BFSfindItem(mazeArray, playerPosX, playerPosY))
+                    {
+                        if (Computerplayer.BFSfindWay(playerPosX, playerPosY))
+                        {
+                            // Item gefunden und Weg gefunden - arbeite Stack ab
+                          
+                        }
+                    }
+                    break;
                 default:
                     break;
                     
@@ -188,12 +198,12 @@ namespace Breitensuche
 
     class Computerplayer
     {
-        Queue<Point> queue = new Queue<Point>();
-        Dictionary<Point, Point> dictionary = new Dictionary<Point, Point>();
-        Stack<Point> stack = new Stack<Point>();
+        static Queue<Point> queue = new Queue<Point>();
+        static Dictionary<Point, Point> dictionary = new Dictionary<Point, Point>();
+        public static Stack<Point> stack = new Stack<Point>();
 
 
-        public bool BFSfindItem(char[,] array,int xPos, int yPos)
+        public static bool BFSfindItem(char[,] array,int xPos, int yPos)
         {
             //Item gefunden
             bool foundItem = false;
@@ -259,18 +269,21 @@ namespace Breitensuche
         }
 
         // Phase 2 beginnend bei Schritt 2.2, Schritt 2.1 siehe Zeile 213
-        void BFSfindWay (int xPos, int yPos)
+        // Spielerposi muss übergeben werden
+       public static bool BFSfindWay (int xPos, int yPos)
         {
+            bool foundWay = false;
             Point playerPos = new Point(xPos, yPos);
             Point from = new Point();
+            ICollection keys = dictionary.Keys;
 
-            //int hashCode = stack.Pop().GetHashCode();
             // Zielposi liegt oben auf Stack, hole Posi 
             Point targetPosi = stack.Pop();
             // Frage ob ZielPosi in Hashtable
             if (dictionary.ContainsKey(targetPosi))
             {
-                ICollection keys = dictionary.Keys;
+                //ICollection keys = dictionary.Keys;
+
                 foreach(Point key in keys)
                 {
                     // lese zugehörigen Value (vorherige Posi) aus Hashtable
@@ -283,15 +296,23 @@ namespace Breitensuche
             // Solange from nicht ausgangsposi entspricht
             while (!playerPos.Equals(from))
             {
+                // lege from auf Stack
                 stack.Push(from);
+                foreach(Point key in keys)
+                {
+                    if(from.GetHashCode() == key.GetHashCode())
+                    {
+                        //bestimme vorherige Posi und lege diese auf Stapel
+                        from = dictionary[from];
+                    }
+                }
 
             }
-
-
-
+            foundWay = true;
+            return foundWay;
         }
 
-        bool CheckNeighbour(char[,] array, Point point, char direction)
+        static bool CheckNeighbour(char[,] array, Point point, char direction)
         {
             bool itemAvailable = false;
 

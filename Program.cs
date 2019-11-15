@@ -300,6 +300,8 @@ namespace Breitensuche
             Point playerPos = new Point(xPos, yPos);
             Point from = new Point();
             ICollection keys = dictionary.Keys;
+            // Zur Diagnose
+            ICollection values = dictionary.Values;
 
             // Zielposi liegt oben auf Stack, hole Posi, aber lege Ziel wieder in den Stack für Navigation
             Point targetPosi = stack.Pop();
@@ -329,6 +331,7 @@ namespace Breitensuche
                     {
                         //bestimme vorherige Posi und lege diese auf Stapel
                         from = dictionary[from];
+                        break;
                     }
                 }
 

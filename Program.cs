@@ -10,6 +10,9 @@ namespace Breitensuche
     {
         char[,] mazeArray;
         int playerPosX = 0, playerPosY = 0;
+        Timer timerBFS = new Timer();
+    
+
 
         public Breitensuche()
         {
@@ -18,6 +21,8 @@ namespace Breitensuche
             Text = "Breitensuche";
             ResizeRedraw = true;
             mazeArray = GetInput();
+            timerBFS.Interval = 500;
+            timerBFS.Tick += new EventHandler(TimerTick);
         }
 
         static void Main()
@@ -120,6 +125,7 @@ namespace Breitensuche
             switch (e.KeyCode)
             {
                 case Keys.Up:
+                    timerBFS.Enabled = false;
                     if (mazeArray[playerPosY - 1, playerPosX] == '#')
                         break;
                     else if(mazeArray[playerPosY -1, playerPosX] == '.')
@@ -135,6 +141,7 @@ namespace Breitensuche
                     Refresh();
                     break;
                 case Keys.Down:
+                    timerBFS.Enabled = false;
                     if (mazeArray[playerPosY + 1, playerPosX] == '#')
                         break;
                     else if (mazeArray[playerPosY + 1, playerPosX] == '.')
@@ -150,6 +157,7 @@ namespace Breitensuche
                     Refresh();
                     break;
                 case Keys.Right:
+                    timerBFS.Enabled = false;
                     if (mazeArray[playerPosY, playerPosX + 1] == '#')
                         break;
                     else if (mazeArray[playerPosY, playerPosX + 1] == '.')
@@ -165,6 +173,7 @@ namespace Breitensuche
                     Refresh();
                     break;
                 case Keys.Left:
+                    timerBFS.Enabled = false;
                     if (mazeArray[playerPosY, playerPosX - 1] == '#')
                         break;
                     else if (mazeArray[playerPosY, playerPosX - 1] == '.')
@@ -180,19 +189,31 @@ namespace Breitensuche
                     Refresh();
                     break;
                 case Keys.S:
-                    if (Computerplayer.BFSfindItem(mazeArray, playerPosX, playerPosY))
-                    {
-                        if (Computerplayer.BFSfindWay(playerPosX, playerPosY))
-                        {
-                            // Item gefunden und Weg gefunden - arbeite Stack ab
-                          
-                        }
-                    }
+                    timerBFS.Enabled = true;
                     break;
                 default:
                     break;
                     
             }
+        }
+        void TimerTick(object sender, EventArgs e)
+        {
+            Point routePoint = new Point();
+            if (Computerplayer.BFSfindItem(mazeArray, playerPosX, playerPosY))
+              {
+                  if (Computerplayer.BFSfindWay(playerPosX, playerPosY))
+                  {
+                      // Item gefunden und Weg gefunden - arbeite Stack ab
+                      while(Computerplayer.stack.Count > 0)
+                    {
+                        routePoint = Computerplayer.stack.Pop();
+                        mazeArray[routePoint.Y, routePoint.X] = '@';
+                        mazeArray[playerPosY, playerPosX] = ' ';
+                        Refresh();
+                    }
+
+                }
+              }
         }
     }
 
@@ -208,6 +229,9 @@ namespace Breitensuche
             //Item gefunden
             bool foundItem = false;
             // Füge Spielerposi in leere Queue ein
+            queue.Clear(); // MUSS HASHTABLE DANN AUCH GELEERT WERDEN?
+            //TEST
+            dictionary.Clear();
             Point playerPos = new Point(xPos, yPos);
             queue.Enqueue(playerPos);
             // Solange Schlange nicht leer ist 
@@ -277,8 +301,9 @@ namespace Breitensuche
             Point from = new Point();
             ICollection keys = dictionary.Keys;
 
-            // Zielposi liegt oben auf Stack, hole Posi 
+            // Zielposi liegt oben auf Stack, hole Posi, aber lege Ziel wieder in den Stack für Navigation
             Point targetPosi = stack.Pop();
+            stack.Push(targetPosi);
             // Frage ob ZielPosi in Hashtable
             if (dictionary.ContainsKey(targetPosi))
             {

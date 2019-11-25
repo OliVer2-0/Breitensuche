@@ -6,14 +6,20 @@ using System.Collections.Generic;
 
 namespace Breitensuche
 {
+    /// <summary>
+    /// Class Breitensuche allows you to walk through a maze, while gathering items.
+    /// </summary>
     class Breitensuche : Form
     {
         char[,] mazeArray;
         int playerPosX = 0, playerPosY = 0;
         Timer timerBFS = new Timer();
+        bool readyToGather = false; 
     
 
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="T:Breitensuche.Breitensuche"/> class.
+        /// </summary>
         public Breitensuche()
         {
             Width = 600;
@@ -21,57 +27,69 @@ namespace Breitensuche
             Text = "Breitensuche";
             ResizeRedraw = true;
             mazeArray = GetInput();
-            timerBFS.Interval = 500;
+            timerBFS.Interval = 400;
             timerBFS.Tick += new EventHandler(TimerTick);
         }
 
+        /// <summary>
+        /// The entry point of the program, where the program control starts and ends.
+        /// </summary>
         static void Main()
         {
             Application.Run(new Breitensuche());
         }
 
+        /// <summary>
+        /// Fires the Paint-Event and allows using the graphics-object. 
+        /// Calculates the spacing between the wallbricks and items. 
+        /// Calls a method to draw the maze.
+        /// </summary>
+        /// <param name="e">E.</param>
         override protected void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
-
-            RectangleF bounds = e.Graphics.VisibleClipBounds; // um die Groesse des sichtbaren Bereichs zu ermitteln
+            // To identify the visible area.
+            RectangleF bounds = e.Graphics.VisibleClipBounds; 
             
             Font mazeFont = new Font("Arial", 12);
-            //Lies Datei ein und lege schreibe auf Array 
-            //char[,] mazeArray = GetInput();
 
-            // Berechne Spacing
+            // Calculating the spacing between wallbricks and items.
             float spaceX = bounds.Width / (float)(mazeArray.GetUpperBound(1) + 1);
             float spaceY = bounds.Height / (float)(mazeArray.GetUpperBound(0) + 1);
-            // Zeichne Labyrinth - Übergabe mazeArray nicht sinnvoll ?! 
+            // Draws the maze. 
             DrawMaze(e.Graphics, mazeArray, mazeFont, spaceX, spaceY);
         }
 
+
+        /// <summary>
+        /// Reads input from a file.
+        /// Converts the input into a 2d-chararray.
+        /// </summary>
+        /// <returns>The input as a 2d-chararray.</returns>
         private char[,] GetInput()
         {
 
             string line = "";
             int counter = 0, i = 0;
 
-
+            // Creating the array, depending on the first two lines, which describe 
+            // how many lines and columns the array will have. 
             int columns = Convert.ToInt16(Console.ReadLine());
             int lines = Convert.ToInt16(Console.ReadLine());
             char[,] charArray = new char[lines, columns];
 
             while (counter <= charArray.GetUpperBound(0))
             {
-                //1. String einlesen 
+                // Read the string 
                 line = Console.ReadLine();
-                //2. Chars aus String kopieren
+                // Copy each char into the 2d-chararray
                 foreach (char c in line)
                 {
-                    // Char auf Array Zeile = Counter, Spalte = i legen
+                    //line = counter, column = i 
                     charArray[counter, i] = c;
-                    // Nächster Char muss in nächste Spalte
                     i++;
                 }
-
-                //3. Bei nächstem String beginne in nächster Zeile und wieder Spalte 0 
+                // Set the startindex for the next string - next line at column 0
                 counter++;
                 i = 0;
             } 
@@ -79,11 +97,18 @@ namespace Breitensuche
             return charArray;
         }
 
-        //Übergebe Array, Startkoordinaten, Schriftart, Abstand zwischen den Zeichen in X und Y 
+        /// <summary>
+        /// Draws the maze.
+        /// </summary>
+        /// <param name="g">The green component.</param>
+        /// <param name="array">Array.</param>
+        /// <param name="font">Font.</param>
+        /// <param name="spacingX">Spacing x.</param>
+        /// <param name="spacingY">Spacing y.</param>
         private void DrawMaze(Graphics g, char[,] array, Font font, float spacingX, float spacingY)
         {
-            // Baue zwei Schleifen die das Labyrinth zeichen und frage ab, welches Zeichen 
-            // Setze anhand der Zeichen unterschiedliche Brushes ein
+            // Create two loops to draw the maze
+            // Use different color based on the char
             float x = 0, y = 0;
 
             for (int i = 0; i <= array.GetUpperBound(0); i++)
@@ -105,25 +130,33 @@ namespace Breitensuche
                         case "@":
                             SolidBrush brushRed = new SolidBrush(Color.Red);
                             g.DrawString(s, font, brushRed, x, y);
-                            //Speichere Start-Spielerposi für späteres navigieren im Laby
+                            // Saving the actual player position to navigate in the maze
                             playerPosX = n;
                             playerPosY = i;
                             break;
-
                     }
                     x = x + spacingX;
                 }
                 y = y + spacingY;
                 x = 0;
             }
-
         }
+
+        /// <summary>
+        /// Uses the KeyDown-Event for checking whether ArrowUp, ArrowDown, ArrowLeft or ArrowRight is pressed.
+        /// Starts the automatically BFS by detecting key 'S' was pressed. 
+        /// </summary>
+        /// <param name="e">E.</param>
         override protected void OnKeyDown(KeyEventArgs e)
         {
             base.OnKeyDown(e);
 
             switch (e.KeyCode)
             {
+                // At first set the timer for the automatic BFS to false, so the player can interrupt 
+                // the computerplayer at any time. 
+                // Check if there is a wall (break here - nothing more to do), if not there might be a item - set the player (@) to the new
+                // position and delete (writing 'SPACE') the last position.
                 case Keys.Up:
                     timerBFS.Enabled = false;
                     if (mazeArray[playerPosY - 1, playerPosX] == '#')
@@ -188,7 +221,9 @@ namespace Breitensuche
                     }
                     Refresh();
                     break;
+                    // Starts the Computerplayer and enables the timer, so the timer can fire its tick event.
                 case Keys.S:
+                    StartBFS();
                     timerBFS.Enabled = true;
                     break;
                 default:
@@ -196,71 +231,116 @@ namespace Breitensuche
                     
             }
         }
+        /// <summary>
+        /// If the Computerplayer shall walk through the maze this method works with the class Computerplayer,
+        /// that implements a BFS to navigate and gather all items automatically. 
+        /// <seealso cref="T:Computerplayer.BFSfindItem(char[,], int, int)"/>
+        /// <seealso cref="T:Computerplayer.BFSfindWay(int, int)"/>
+        /// </summary>
+        void StartBFS()
+        {
+            readyToGather = false;
+            // If the Breadth-first search finds an item ...
+            if (Computerplayer.BFSfindItem(mazeArray, playerPosX, playerPosY))
+            {
+                // ... and if the BFS finds a way to this item ...
+                if (Computerplayer.BFSfindWay(playerPosX, playerPosY))
+                {
+                    // ... the Computerplayer is ready to gather the next item.
+                    readyToGather = true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Registered method for the TimerBFS.Tick-Event. 
+        /// </summary>
+        /// <param name="sender">Sender.</param>
+        /// <param name="e">E.</param>
         void TimerTick(object sender, EventArgs e)
         {
             Point routePoint = new Point();
-            if (Computerplayer.BFSfindItem(mazeArray, playerPosX, playerPosY))
-              {
-                  if (Computerplayer.BFSfindWay(playerPosX, playerPosY))
-                  {
-                      // Item gefunden und Weg gefunden - arbeite Stack ab
-                      while(Computerplayer.stack.Count > 0)
-                    {
-                        routePoint = Computerplayer.stack.Pop();
-                        mazeArray[routePoint.Y, routePoint.X] = '@';
-                        mazeArray[playerPosY, playerPosX] = ' ';
-                        Refresh();
-                    }
-
+                
+            if (readyToGather)
+            {
+                if(Computerplayer.stack.Count > 0)
+                {   
+                    // Every time the timer fires the Tick-Event the computerplayer moves one step closer 
+                    // to his targetposition, which is the last one on the stack. 
+                    // Pop the next coordinates from the stack.
+                    // Edit the maze and set the new playerposition
+                    // Draw the maze.
+                    routePoint = Computerplayer.stack.Pop();
+                    mazeArray[routePoint.Y, routePoint.X] = '@';
+                    mazeArray[playerPosY, playerPosX] = ' ';
+                    Refresh();
                 }
-              }
+                else
+                {
+                   // If the stack is empty, the computerplayer should have reached his targetposition
+                   // and the Breadth-first search is going to find the next item.
+                    StartBFS();
+                }
+            }
+
         }
     }
 
+    /// <summary>
+    /// Implements a Breadth-first search for gathering all items in the maze automatically by a computerplayer.
+    /// </summary>
     class Computerplayer
     {
         static Queue<Point> queue = new Queue<Point>();
         static Dictionary<Point, Point> dictionary = new Dictionary<Point, Point>();
         public static Stack<Point> stack = new Stack<Point>();
 
-
+        /// <summary>
+        /// Step 1 of the BFS - finds a Item
+        /// </summary>
+        /// <returns><c>true</c>, if find item was BFSed, <c>false</c> otherwise.</returns>
+        /// <param name="array">Array.</param>
+        /// <param name="xPos">X position.</param>
+        /// <param name="yPos">Y position.</param>
         public static bool BFSfindItem(char[,] array,int xPos, int yPos)
         {
-            //Item gefunden
+
             bool foundItem = false;
-            // Füge Spielerposi in leere Queue ein
-            queue.Clear(); // MUSS HASHTABLE DANN AUCH GELEERT WERDEN?
-            //TEST
+            // Add playerposition to the empty queue
+            queue.Clear(); 
             dictionary.Clear();
             Point playerPos = new Point(xPos, yPos);
             queue.Enqueue(playerPos);
-            // Solange Schlange nicht leer ist 
+
+            // While queue is not empty... 
             while(queue.Count > 0)
             {
-                // hole erstes Paar aus der Queue
+                // ... get first pair of coordinates from the queue
                 Point firstPoint = queue.Dequeue();
-                // falls hier Item, brich ab und weiter mit Phase 2 
+                // ... if there is an item: break - and go on with phase 2.
                 if(array[firstPoint.Y,firstPoint.X] == '.')
                 {
                     foundItem = true;
-                    // Lege Zielkoordinaten auf Stack - Schritt 2.1
+                    // Push the targetposition onto the stack. 
                     stack.Push(firstPoint);
                     break;
                 }
                 else
                 {
-                    // oberer Nachbar - entscheide mit Hilfe von CheckNeighbour
-                    // if(CheckNeighbour(array, point, direction) -> füge hinzu
-                    if(CheckNeighbour(array,firstPoint,'u') )
+                    // If there is a possible item at a neighbourpositon ...
+                    if(CheckNeighbour(array,firstPoint,'u') ) // u = upper neighbour
                     {
-                        // Füge Nachbarn in die Queue ein
+                        // ... add neighbourposition to the queue ... 
                         Point pointAbove = new Point(firstPoint.X, firstPoint.Y - 1);
                         queue.Enqueue(pointAbove);
-                        //Nachbarn als Key hinzufügen und aktuelle Koordinaten als Value
+                        // ... and add the neighbourposition as a key to the dictionary, add the coordinates of 
+                        // the step before as a value to the dictionary.
+                        // So in further steps of the algorithm the computerplayer knows, from which coordinates (value)
+                        // the checked neighbourcoordinates can be reached (key).
                         dictionary.Add(pointAbove, firstPoint);
                     
                     }
-                    if (CheckNeighbour(array, firstPoint, 'd'))
+                    if (CheckNeighbour(array, firstPoint, 'd')) // d = down below
                     {
                         Point pointBelow = new Point(firstPoint.X, firstPoint.Y + 1);
                         queue.Enqueue(pointBelow);
@@ -268,7 +348,7 @@ namespace Breitensuche
                         dictionary.Add(pointBelow, firstPoint);
                        
                     }
-                    if (CheckNeighbour(array, firstPoint, 'l'))
+                    if (CheckNeighbour(array, firstPoint, 'l')) // l = left neighbour
                     {
                         Point pointLeft = new Point(firstPoint.X - 1, firstPoint.Y);
                         queue.Enqueue(pointLeft);
@@ -276,7 +356,7 @@ namespace Breitensuche
                         dictionary.Add(pointLeft, firstPoint);
                        
                     }
-                    if (CheckNeighbour(array, firstPoint, 'r'))
+                    if (CheckNeighbour(array, firstPoint, 'r')) // r = right neighbour
                     {
                         Point pointRight = new Point(firstPoint.X + 1, firstPoint.Y);
                         queue.Enqueue(pointRight);
@@ -287,49 +367,54 @@ namespace Breitensuche
 
                 }
             }
-            // Falls in Phase 1 Item gefunden, weiter mit Phase 2 
+            // If the BFS found an item in this phase, the BFS will go ahead with phase 2. 
             return foundItem;
 
         }
 
-        // Phase 2 beginnend bei Schritt 2.2, Schritt 2.1 siehe Zeile 213
-        // Spielerposi muss übergeben werden
+      /// <summary>
+      /// Phase 2 of the BFS-Algorithm - if an item was found in phase 1, now the algorithm
+      /// finds the way to this item. 
+      /// </summary>
+      /// <returns><c>true</c>, if find way was BFSed, <c>false</c> otherwise.</returns>
+      /// <param name="xPos">X position.</param>
+      /// <param name="yPos">Y position.</param>
        public static bool BFSfindWay (int xPos, int yPos)
         {
             bool foundWay = false;
             Point playerPos = new Point(xPos, yPos);
             Point from = new Point();
             ICollection keys = dictionary.Keys;
-            // Zur Diagnose
-            ICollection values = dictionary.Values;
 
-            // Zielposi liegt oben auf Stack, hole Posi, aber lege Ziel wieder in den Stack für Navigation
+            // Get targetposition - which is already on the stack. 
             Point targetPosi = stack.Pop();
             stack.Push(targetPosi);
-            // Frage ob ZielPosi in Hashtable
+
+            // If dictionary contains the targetposition, read the value of the key to set a 
+            // Point 'from' - these coordinates are representing the coordinates, where the computerplayer
+            // can reach the targetposition from.
             if (dictionary.ContainsKey(targetPosi))
             {
-                //ICollection keys = dictionary.Keys;
-
                 foreach(Point key in keys)
                 {
-                    // lese zugehörigen Value (vorherige Posi) aus Hashtable
                     if(targetPosi.GetHashCode() == key.GetHashCode())
                     {
                         from = dictionary[targetPosi];
                     }
                 }
             }
-            // Solange from nicht ausgangsposi entspricht
+            // While the point where the BFS came from, isnt the origin playerposition
+            // read more values from the dictionary, which represent waypoints. 
+            // So a route of waypoints can be created and pushed onto the stack.
             while (!playerPos.Equals(from))
             {
-                // lege from auf Stack
+
                 stack.Push(from);
                 foreach(Point key in keys)
                 {
                     if(from.GetHashCode() == key.GetHashCode())
                     {
-                        //bestimme vorherige Posi und lege diese auf Stapel
+                        // Add a new waypoint to the stack, to create a way through the maze.
                         from = dictionary[from];
                         break;
                     }
@@ -340,19 +425,29 @@ namespace Breitensuche
             return foundWay;
         }
 
+        /// <summary>
+        /// Checks the neighbourcoordinates for possible avaiable items.
+        /// </summary>
+        /// <returns><c>true</c>, if neighbour was checked and the coordinates 
+        /// are neither blocked nor already in the dictionary </returns>
+        /// <param name="array">Array.</param>
+        /// <param name="point">Point.</param>
+        /// <param name="direction">Direction.</param>
         static bool CheckNeighbour(char[,] array, Point point, char direction)
         {
             bool itemAvailable = false;
 
+           
             switch (direction)
             {
                 case 'u':
-                 
-                    // Setze Point auf Nachbarkoordinaten
+
+                    // Set the point to the coordinates to check
                     point.Y = point.Y - 1;
-                    // if nicht geblockt und nicht in hashtable
+                    // If the point is not blocked by a wall AND is not already in the dictionary ...
                     if (array[point.Y, point.X] != '#' && !dictionary.ContainsKey(point))
                     {
+                        // ... there could possibly be an item.
                         itemAvailable = true;
                     }
                     break;
@@ -383,5 +478,4 @@ namespace Breitensuche
             return itemAvailable;
         }
     }
-
 }
